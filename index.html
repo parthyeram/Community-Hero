@@ -1,0 +1,606 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Hero | Hyperlocal Problem Solver</title>
+    <meta name="description" content="Report and track community issues with AI-powered insights, real-time mapping, and gamified civic rewards.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="glass" id="main-nav">
+        <div class="container">
+            <div class="logo-container" onclick="window.navigateTo('home')">
+                <span class="logo-icon">CH</span>
+                <span class="logo-text">HERO.COMMUNITY</span>
+            </div>
+            <div class="nav-links">
+                <a onclick="window.navigateTo('home')" id="nav-home" class="active">Home</a>
+                <a onclick="window.navigateTo('map')" id="nav-map">Live Map</a>
+                <a onclick="window.navigateTo('report')" id="nav-report">Report Issue</a>
+                <a onclick="window.navigateTo('dashboard')" id="nav-dashboard">Dashboard</a>
+                <a onclick="window.navigateTo('leaderboard')" id="nav-leaderboard">Leaderboard</a>
+                <a onclick="window.navigateTo('profile')" id="nav-profile" style="display: none;">My Profile</a>
+                
+                <button class="btn btn-primary btn-sm" id="nav-login-btn" onclick="window.showAuthModal('login')">Sign In</button>
+                
+                <div class="user-nav-profile" id="nav-user-profile" style="display: none;" onclick="window.navigateTo('profile')">
+                    <div class="user-nav-avatar" id="nav-user-avatar">U</div>
+                    <span class="user-nav-points" id="nav-user-points">0 pts</span>
+                </div>
+                
+                <a onclick="window.showSettingsModal()" style="display: flex; align-items: center;" title="Settings">
+                    <i data-lucide="settings" style="width: 20px; height: 20px;"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SPA VIEW: Home/Landing Section -->
+    <section class="view-section active" id="view-home">
+        <div class="hero-wrapper">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-tagline">
+                        <i data-lucide="sparkles" style="width: 16px; height: 16px; color: var(--accent);"></i>
+                        AI-POWERED CIVIC-TECH PLATFORM
+                    </div>
+                    <h1>
+                        Empower Your
+                        <span>Neighborhood</span>
+                    </h1>
+                    <p>Make your city cleaner, safer, and better. Report hyperlocal infrastructure, waste, and lighting issues. Get immediate AI categorization and track resolution in real-time.</p>
+                    <div class="hero-btns">
+                        <button class="btn btn-primary" onclick="window.navigateTo('report')">
+                            <i data-lucide="plus-circle"></i> File a Report
+                        </button>
+                        <button class="btn btn-outline" onclick="window.navigateTo('map')">
+                            <i data-lucide="map"></i> Explore Map
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hero-stats-banner glass">
+                    <div class="hero-stat-box">
+                        <div class="hero-stat-num" id="hero-stat-resolved">284</div>
+                        <div class="hero-stat-lbl">Issues Resolved</div>
+                    </div>
+                    <div class="hero-stat-box">
+                        <div class="hero-stat-num">98%</div>
+                        <div class="hero-stat-lbl">Community Verified</div>
+                    </div>
+                    <div class="hero-stat-box">
+                        <div class="hero-stat-num" id="hero-stat-points">5,840</div>
+                        <div class="hero-stat-lbl">Hero Points Earned</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Features Section -->
+            <div class="home-section-header">
+                <h2>Platform Features</h2>
+                <p>Equipping citizens with next-gen tools for community improvement</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card glass">
+                    <div class="feature-icon"><i data-lucide="camera"></i></div>
+                    <h3>AI Classification</h3>
+                    <p>Upload a photo and the Gemini AI instantly detects category, severity, and summarizes the issue.</p>
+                </div>
+                <div class="feature-card glass">
+                    <div class="feature-icon"><i data-lucide="map"></i></div>
+                    <h3>Interactive Map</h3>
+                    <p>Pin issues accurately with GPS auto-detection or interactive map picker using Leaflet and OSM.</p>
+                </div>
+                <div class="feature-card glass">
+                    <div class="feature-icon"><i data-lucide="trophy"></i></div>
+                    <h3>Gamified Badges</h3>
+                    <p>Earn Hero Points for filing issues, verifying posts, and commenting. Claim badges and climb the board.</p>
+                </div>
+            </div>
+
+            <!-- How It Works Section -->
+            <div class="home-section-header">
+                <h2>How It Works</h2>
+                <p>3 simple steps to make an impact in your locality</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card glass">
+                    <span class="step-number">1</span>
+                    <h3>Report</h3>
+                    <p>Take a photo, choose categories, let AI identify severity and pin the location on the map.</p>
+                </div>
+                <div class="step-card glass">
+                    <span class="step-number">2</span>
+                    <h3>Verify</h3>
+                    <p>Fellow neighborhood citizens review, upvote, and comment on report authenticity.</p>
+                </div>
+                <div class="step-card glass">
+                    <span class="step-number">3</span>
+                    <h3>Resolve</h3>
+                    <p>Local community heroes or authorities address the issue. Status updates from Open to Resolved.</p>
+                </div>
+            </div>
+
+            <!-- Testimonials -->
+            <div class="home-section-header">
+                <h2>Citizen Feedback</h2>
+                <p>Hear what active neighborhood heroes say about the app</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card glass">
+                    <p class="testimonial-text">"Reporting a waste dumpster was so easy. The AI automatically guessed the category, and within 3 days, it was fully cleared."</p>
+                    <div class="testimonial-user">
+                        <div class="testimonial-avatar">RK</div>
+                        <div>
+                            <div class="testimonial-name">Rohan Kapoor</div>
+                            <div class="testimonial-title">Top Reporter - Sector 4</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card glass">
+                    <p class="testimonial-text">"Verifying issues earns me points. It makes me feel responsible for my street's infrastructure. The dark mode looks super premium!"</p>
+                    <div class="testimonial-user">
+                        <div class="testimonial-avatar">SN</div>
+                        <div>
+                            <div class="testimonial-name">Sneha Nair</div>
+                            <div class="testimonial-title">Civic Champion - Bandra</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SPA VIEW: Interactive Live Map -->
+    <section class="view-section" id="view-map">
+        <div class="container">
+            <h2 style="margin-bottom: 0.5rem;">Live Incident Map</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Filter and locate hyperlocal issues logged in your community</p>
+
+            <div class="map-control-panel">
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="map-search-input" placeholder="Search location (e.g. Mumbai, Adyar, Indiranagar)...">
+                </div>
+                <button type="button" class="btn btn-outline" id="map-locate-btn" style="padding: 0.9rem 1.1rem;" title="Show my live location on map">
+                    <i data-lucide="locate"></i>
+                </button>
+
+                <div class="map-filters">
+                    <select id="filter-category">
+                        <option value="all">All Categories</option>
+                        <option value="Pothole">Pothole</option>
+                        <option value="Water Leakage">Water Leakage</option>
+                        <option value="Streetlight Damage">Streetlight Damage</option>
+                        <option value="Waste Management">Waste Management</option>
+                        <option value="Road Damage">Road Damage</option>
+                        <option value="Public Safety">Public Safety</option>
+                        <option value="Infrastructure Damage">Infrastructure Damage</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <select id="filter-status">
+                        <option value="all">All Statuses</option>
+                        <option value="Open">Open</option>
+                        <option value="Verified">Verified</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+                    <select id="filter-severity">
+                        <option value="all">All Severities</option>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="map"></div>
+        </div>
+    </section>
+
+    <!-- SPA VIEW: Report Issue -->
+    <section class="view-section" id="view-report">
+        <div class="container">
+            <div style="max-width: 700px; margin: 0 auto;">
+                <h2 style="margin-bottom: 0.5rem; text-align: center;">Report a Community Issue</h2>
+                <p style="color: var(--text-muted); margin-bottom: 2.5rem; text-align: center;">Take a photo to activate instant AI classification and location logging</p>
+                
+                <div class="glass" style="padding: 2.5rem; border-radius: var(--radius); box-shadow: var(--shadow);">
+                    <form id="report-issue-form">
+                        
+                        <!-- Upload Media -->
+                        <div class="form-group">
+                            <label>Upload Media (Image or Video)*</label>
+                            <div class="image-upload-zone" id="media-drop-zone">
+                                <input type="file" id="issue-media-input" accept="image/*,video/*" required>
+                                <i data-lucide="camera" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 0.75rem; display: block; margin-inline: auto;"></i>
+                                <span style="font-weight: 600; display: block; margin-bottom: 0.25rem;" id="media-upload-status">Drag & drop or tap to upload</span>
+                                <span style="font-size: 0.8rem; color: var(--text-muted);" id="media-file-info">Supports JPEG, PNG, MP4 up to 5MB</span>
+                                <img id="issue-img-preview" class="image-preview-box" alt="Upload Preview">
+                            </div>
+                        </div>
+
+                        <!-- AI Analyzing Indicator -->
+                        <div class="ai-analyzing-badge" id="ai-loading-box">
+                            <i data-lucide="sparkles" class="spin"></i>
+                            <span>Gemini AI is analyzing your image. Auto-categorizing...</span>
+                        </div>
+
+                        <!-- Issue Title -->
+                        <div class="form-group">
+                            <label for="issue-title">Issue Title*</label>
+                            <input type="text" id="issue-title" placeholder="Give a brief title of the problem (e.g. Deep pothole next to metro post 14)" required>
+                        </div>
+
+                        <!-- AI Suggestions Box -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;" id="ai-suggestions-row">
+                            <div class="form-group">
+                                <label for="issue-category">Category*</label>
+                                <select id="issue-category" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Pothole">Pothole</option>
+                                    <option value="Water Leakage">Water Leakage</option>
+                                    <option value="Streetlight Damage">Streetlight Damage</option>
+                                    <option value="Waste Management">Waste Management</option>
+                                    <option value="Road Damage">Road Damage</option>
+                                    <option value="Public Safety">Public Safety</option>
+                                    <option value="Infrastructure Damage">Infrastructure Damage</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="issue-severity">Severity & Priority</label>
+                                <select id="issue-severity" required>
+                                    <option value="Low">Low Severity (Low Priority)</option>
+                                    <option value="Medium" selected>Medium Severity (Medium Priority)</option>
+                                    <option value="High">High Severity (High Priority)</option>
+                                    <option value="Critical">Critical Severity (Immediate Attention)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-group">
+                            <label for="issue-desc">Detailed Description*</label>
+                            <textarea id="issue-desc" rows="4" placeholder="Explain the problem in detail to help verifiers and authorities..." required></textarea>
+                        </div>
+
+                        <!-- Location coordinate picker map -->
+                        <div class="form-group">
+                            <label>Geotag Location*</label>
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <input type="text" id="issue-location-coords" placeholder="Coordinates (Latitude, Longitude)" readonly required>
+                                <button type="button" class="btn btn-outline" style="padding: 0 1.25rem;" id="gps-locate-btn" title="Auto-detect location using GPS">
+                                    <i data-lucide="map-pin"></i> Locate Me
+                                </button>
+                            </div>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Click anywhere on the map below to adjust the marker location.</span>
+                            <div id="picker-map" style="height: 250px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.08);"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; font-size: 1.1rem; padding: 1rem;" id="submit-report-btn">
+                            Submit Community Report
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SPA VIEW: Issue Details (Interactive feed node) -->
+    <section class="view-section" id="view-details">
+        <div class="container">
+            <button class="btn btn-outline btn-sm" onclick="window.navigateTo('map')" style="margin-bottom: 1.5rem;">
+                &larr; Back to Map
+            </button>
+            <div class="details-view-grid" id="details-root">
+                <!-- Rendered dynamically by app.js -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SPA VIEW: Analytics Dashboard -->
+    <section class="view-section" id="view-dashboard">
+        <div class="container">
+            <h2 style="margin-bottom: 0.5rem;">Community Dashboard</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2.5rem;">Real-time analytical graphs, metrics, and AI predictive city insights</p>
+
+            <!-- Metrics Cards -->
+            <div class="stats-grid">
+                <div class="stat-metric-card glass">
+                    <div class="stat-icon-wrapper" style="color: var(--primary);">
+                        <i data-lucide="alert-triangle"></i>
+                    </div>
+                    <div class="stat-meta">
+                        <h3 id="dash-total-issues">0</h3>
+                        <p>Total Reported</p>
+                    </div>
+                </div>
+                <div class="stat-metric-card glass">
+                    <div class="stat-icon-wrapper" style="color: var(--warning);">
+                        <i data-lucide="loader"></i>
+                    </div>
+                    <div class="stat-meta">
+                        <h3 id="dash-open-issues">0</h3>
+                        <p>Unresolved</p>
+                    </div>
+                </div>
+                <div class="stat-metric-card glass">
+                    <div class="stat-icon-wrapper" style="color: var(--success);">
+                        <i data-lucide="check-circle2"></i>
+                    </div>
+                    <div class="stat-meta">
+                        <h3 id="dash-resolved-issues">0</h3>
+                        <p>Resolved</p>
+                    </div>
+                </div>
+                <div class="stat-metric-card glass">
+                    <div class="stat-icon-wrapper" style="color: var(--accent);">
+                        <i data-lucide="clock"></i>
+                    </div>
+                    <div class="stat-meta">
+                        <h3 id="dash-avg-time">24h</h3>
+                        <p>Avg. Resolution</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart.js Canvas Grid -->
+            <div class="charts-grid">
+                <div class="chart-card glass">
+                    <h3>Issue Categories</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-categories"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card glass">
+                    <h3>Reporting Monthly Trends</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-trends"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card glass">
+                    <h3>Incident Status Breakdown</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-status"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Predictive Insights Panel -->
+            <div class="ai-insights-panel glass">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; color: white;">
+                    <i data-lucide="sparkles" style="color: var(--accent);"></i> AI Predictive Neighborhood Insights
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Analysis compiled by Google Gemini based on local report telemetry</p>
+                
+                <div class="insights-list-grid" id="insights-container">
+                    <!-- Loaded dynamically or filled with fallback smart mocks -->
+                    <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2rem;">
+                        <i data-lucide="loader" class="spin" style="margin-bottom: 0.5rem;"></i>
+                        <p>Aggregating data and generating insights...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SPA VIEW: Leaderboard -->
+    <section class="view-section" id="view-leaderboard">
+        <div class="container">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <h2 style="margin-bottom: 0.5rem; text-align: center;">Active Heroes Leaderboard</h2>
+                <p style="color: var(--text-muted); margin-bottom: 2.5rem; text-align: center;">Civic rewards leaderboard tracking community contributions, reports, and badges</p>
+
+                <div class="table-wrapper glass">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; width: 60px;">Rank</th>
+                                <th>Hero User</th>
+                                <th style="text-align: right; padding-right: 1.5rem;">Points</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SPA VIEW: Profile -->
+    <section class="view-section" id="view-profile">
+        <div class="container">
+            <div style="max-width: 850px; margin: 0 auto;">
+                <!-- Profile Header -->
+                <div class="profile-hero-card glass">
+                    <div class="profile-avatar-large" id="profile-avatar">U</div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                            <h2 id="profile-name">User Name</h2>
+                            <span class="role-tag" id="profile-role">Citizen</span>
+                        </div>
+                        <p id="profile-email" style="color: var(--text-muted); margin-bottom: 1rem;">user@example.com</p>
+                        <div id="profile-badges" style="display: flex; flex-wrap: wrap;">
+                            <!-- Badges pills rendered dynamically -->
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline btn-sm" id="profile-logout-btn">
+                            <i data-lucide="log-out"></i> Log Out
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Profile Statistics Grid -->
+                <div class="stats-grid" style="margin-bottom: 3rem;">
+                    <div class="stat-metric-card glass" style="justify-content: center; text-align: center; padding: 1.25rem;">
+                        <div class="profile-metric-item">
+                            <div class="profile-metric-val" id="profile-metric-points">0</div>
+                            <div class="profile-metric-lbl">Total Points</div>
+                        </div>
+                    </div>
+                    <div class="stat-metric-card glass" style="justify-content: center; text-align: center; padding: 1.25rem;">
+                        <div class="profile-metric-item">
+                            <div class="profile-metric-val" id="profile-metric-reports">0</div>
+                            <div class="profile-metric-lbl">Reports Filed</div>
+                        </div>
+                    </div>
+                    <div class="stat-metric-card glass" style="justify-content: center; text-align: center; padding: 1.25rem;">
+                        <div class="profile-metric-item">
+                            <div class="profile-metric-val" id="profile-metric-votes">0</div>
+                            <div class="profile-metric-lbl">Upvotes Given</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Reports List -->
+                <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem;">My Submitted Reports</h3>
+                <div id="profile-reports-container">
+                    <!-- Reports lists loaded here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEVELOPER CONFIG / SETTINGS MODAL -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-card glass">
+            <div class="modal-header">
+                <h3>Settings / Developer Keys</h3>
+                <button class="modal-close" onclick="window.closeSettingsModal()">&times;</button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">
+                Connect this client application directly to your live services. If left blank, the app will run locally using high-fidelity mock services.
+            </p>
+            
+            <form id="settings-config-form">
+                <!-- Firebase API Config -->
+                <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.25rem;">
+                    Firebase Firestore & Auth
+                </div>
+                <div class="form-group">
+                    <label for="cfg-firebase-apiKey">API Key</label>
+                    <input type="password" id="cfg-firebase-apiKey" placeholder="AIzaSy...">
+                </div>
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div>
+                        <label for="cfg-firebase-projectId">Project ID</label>
+                        <input type="text" id="cfg-firebase-projectId" placeholder="community-hero-123">
+                    </div>
+                    <div>
+                        <label for="cfg-firebase-appId">App ID</label>
+                        <input type="text" id="cfg-firebase-appId" placeholder="1:123456:web:abcd">
+                    </div>
+                </div>
+
+                <!-- Cloudinary Configuration -->
+                <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.25rem;">
+                    Cloudinary Unsigned Uploads
+                </div>
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div>
+                        <label for="cfg-cloudinary-cloudName">Cloud Name</label>
+                        <input type="text" id="cfg-cloudinary-cloudName" placeholder="mycloudinarycloud">
+                    </div>
+                    <div>
+                        <label for="cfg-cloudinary-preset">Upload Preset</label>
+                        <input type="text" id="cfg-cloudinary-preset" placeholder="preset_unsigned">
+                    </div>
+                </div>
+
+                <!-- Gemini API Key -->
+                <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.25rem;">
+                    Google Gemini API Key (Optional Local Override)
+                </div>
+                <div class="form-group">
+                    <label for="cfg-gemini-key">Gemini API Key</label>
+                    <input type="password" id="cfg-gemini-key" placeholder="Leave blank in production; Netlify env handles this">
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Configuration</button>
+                    <button type="button" class="btn btn-outline" onclick="window.clearSettingsConfig()">Clear Keys</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- AUTHENTICATION DIALOG (Login / Register) -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal-card glass">
+            <div class="modal-header">
+                <h3 id="auth-modal-title">Sign In</h3>
+                <button class="modal-close" onclick="window.closeAuthModal()">&times;</button>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="auth-login-form">
+                <div class="form-group">
+                    <label for="login-email">Email Address</label>
+                    <input type="email" id="login-email" placeholder="hero@community.org" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="********" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Sign In</button>
+                <p class="auth-switch-text">New to the platform? <span onclick="window.switchAuthForm('signup')">Sign Up here</span></p>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="auth-signup-form" style="display: none;">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" placeholder="Priya Nair" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email Address</label>
+                    <input type="email" id="signup-email" placeholder="priya@example.com" required>
+                </div>
+                <div class="form-group" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 0.5rem;">
+                    <div>
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" placeholder="Min. 6 chars" required minlength="6">
+                    </div>
+                    <div>
+                        <label for="signup-role">Role</label>
+                        <select id="signup-role" required>
+                            <option value="citizen">Citizen</option>
+                            <option value="admin">Ward Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Register Account</button>
+                <p class="auth-switch-text">Already have an account? <span onclick="window.switchAuthForm('login')">Sign In here</span></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Community Hero Platform. Shaping better neighborhoods using hyperlocal civic-tech & AI.</p>
+        </div>
+    </footer>
+
+    <!-- App Entry Script -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>

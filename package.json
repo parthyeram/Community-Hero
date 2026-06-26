@@ -1,0 +1,22 @@
+{
+  "name": "community-hero",
+  "version": "1.0.0",
+  "description": "Community Hero - Hyperlocal Problem Solver platform",
+  "main": "app.js",
+  "scripts": {
+    "dev": "npx http-server -p 3000 ."
+  },
+  "keywords": [
+    "civic-tech",
+    "leaflet",
+    "gemini-api",
+    "firebase",
+    "cloudinary"
+  ],
+  "author": "Community Hero Team",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
