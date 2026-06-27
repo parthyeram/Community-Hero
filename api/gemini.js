@@ -1,4 +1,4 @@
-const MODEL = "gemini-1.5-flash";
+const MODEL = "gemini-2.0-flash";
 const CATEGORIES = "'Pothole', 'Water Leakage', 'Streetlight Damage', 'Waste Management', 'Road Damage', 'Public Safety', 'Infrastructure Damage', 'Other'";
 
 function buildGeminiBody(eventBody) {
