@@ -50,10 +50,15 @@ async function callGeminiProxy(action, payload) {
         body: requestBody
     });
 
-    if (!response.ok) {
-        throw new Error("Gemini serverless proxy failed");
-    }
+   if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
 
+    throw new Error(
+        `Gemini proxy failed (${response.status}): ${
+            err.detail || err.error || "Unknown error"
+        }`
+    );
+}
     return response.json();
 }
 
