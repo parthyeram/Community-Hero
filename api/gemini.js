@@ -76,12 +76,13 @@ module.exports = async (req, res) => {
         }
 
         const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!text) {
-            return res.status(502).json({ error: "Gemini returned an empty response" });
-        }
-
-        return res.status(200).json(JSON.parse(text));
+     let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+if (!text) {
+    return res.status(502).json({ error: "Gemini returned an empty response" });
+}
+// Strip markdown fences Gemini sometimes adds
+text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/, '').trim();
+return res.status(200).json(JSON.parse(text));
     } catch (error) {
         return res.status(500).json({ error: error.message || "Gemini proxy error" });
     }

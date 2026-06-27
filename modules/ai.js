@@ -162,25 +162,24 @@ export async function analyzeIssueImage(base64Image, descriptionText, apiKey, fi
 export async function analyzeIssueText(descriptionText, apiKey) {
     const prompt = `Based on this description of a community issue: "${descriptionText}", classify the issue. Respond strictly with a JSON object containing the keys: 'category' (must be one of: 'Pothole', 'Water Leakage', 'Streetlight Damage', 'Waste Management', 'Road Damage', 'Public Safety', 'Infrastructure Damage', 'Other'), 'severity' ('Low', 'Medium', 'High'), 'priority' ('Low', 'Medium', 'High', 'Critical'), and 'summary' (a concise 1-sentence summary of the problem). Do not return markdown wrappers.`;
 
+    // 1. Always try proxy first (key lives on Vercel, not in browser)
+    try {
+        return await callGeminiProxy('analyzeText', { descriptionText });
+    } catch (error) {
+        console.warn("Gemini proxy text analysis failed:", error);
+    }
+
+    // 2. Direct only if user manually entered a key in Settings
     if (apiKey) {
         try {
             return await callGeminiDirect([{ text: prompt }], apiKey, "Gemini Text API call failed");
         } catch (error) {
-            console.error("Gemini Text Analysis failed, using local fallback:", error);
-        }
-    } else {
-        try {
-            return await callGeminiProxy('analyzeText', { descriptionText });
-        } catch (error) {
-            console.error("Gemini proxy text analysis unavailable, using local fallback:", error);
+            console.warn("Gemini Text direct call failed:", error);
         }
     }
 
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(getSmartFallbackAnalysis(descriptionText));
-        }, 800);
-    });
+    // 3. Offline keyword fallback
+    return getSmartFallbackAnalysis(descriptionText);
 }
 
 export async function generatePredictiveInsights(issues, apiKey) {
