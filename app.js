@@ -407,14 +407,16 @@ function initReportForm() {
 
     // Text-based AI classification suggestions
     const triggerTextAiAnalysis = async () => {
-        // Only run if no image has been uploaded to avoid overriding image analysis
-        if (uploadedFile || isAiAnalyzing) return;
+        if (isAiAnalyzing) return;
 
         const titleVal = document.getElementById('issue-title').value.trim();
         const descVal = document.getElementById('issue-desc').value.trim();
         const combined = `${titleVal}. ${descVal}`.trim();
 
         if (combined.length < 8) return;
+
+        const currentCategory = document.getElementById('issue-category').value;
+        if (uploadedFile && currentCategory && currentCategory !== 'Other') return;
 
         aiLoadingBox.style.display = 'flex';
         aiLoadingBox.querySelector('span').textContent = "AI is analyzing description to suggest category...";
