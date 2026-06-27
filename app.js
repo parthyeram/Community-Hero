@@ -18,7 +18,7 @@ let explorerMapInstance = null;
 // Initialise Application
 async function initApp() {
     // Load config keys from localStorage
-    loadConfig();
+    await loadConfig();
 
     // Initialize modules
     await Auth.initialize(currentConfig.firebase);
@@ -51,17 +51,42 @@ async function initApp() {
 // -------------------------------------------------------------
 // CONFIGURATION MANAGER
 // -------------------------------------------------------------
-function loadConfig() {
-    const saved = localStorage.getItem('community_hero_config');
-    if (saved) {
-        currentConfig = JSON.parse(saved);
-    } else {
-        currentConfig = {
-            firebase: { apiKey: "", projectId: "", appId: "" },
-            cloudinary: { cloudName: "", uploadPreset: "" },
-            gemini: { apiKey: "" }
-        };
+async function loadConfig() {
+    const defaultConfig = {
+        firebase: { apiKey: "", authDomain: "", projectId: "", appId: "" },
+        cloudinary: { cloudName: "", uploadPreset: "" },
+        gemini: { apiKey: "" }
+    };
+
+    let deploymentConfig = {};
+    try {
+        const response = await fetch('/api/config');
+        if (response.ok) {
+            deploymentConfig = await response.json();
+        }
+    } catch (error) {
+        console.warn("Shared deployment config unavailable, using local settings fallback:", error);
     }
+
+    const saved = localStorage.getItem('community_hero_config');
+    const localConfig = saved ? JSON.parse(saved) : {};
+
+    currentConfig = {
+        firebase: {
+            ...defaultConfig.firebase,
+            ...(localConfig.firebase || {}),
+            ...(deploymentConfig.firebase || {})
+        },
+        cloudinary: {
+            ...defaultConfig.cloudinary,
+            ...(localConfig.cloudinary || {}),
+            ...(deploymentConfig.cloudinary || {})
+        },
+        gemini: {
+            ...defaultConfig.gemini,
+            ...(localConfig.gemini || {})
+        }
+    };
 }
 
 function saveConfig(config) {
